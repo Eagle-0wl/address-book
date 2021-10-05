@@ -34,16 +34,16 @@ int menu (struct Address_book **address_book_head)
     fflush (stdin);
     switch (choice){
         case 1:
-            insert_address(address_book_head);
+            insert_contact(address_book_head);
             break;
         case 2:
-            delete_address(address_book_head);
+            delete_contact(address_book_head);
             break;
         case 3:
-            display_address(address_book_head);
+            display_address_book(address_book_head);
             break;
         case 4:
-            search_address(address_book_head);
+            search_for_contact(address_book_head);
             break;
         case 5:
             cleanup(address_book_head);
