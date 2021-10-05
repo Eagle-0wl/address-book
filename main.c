@@ -1,7 +1,6 @@
 
 #include <stdio.h>
 #include <string.h>
-//#include <stdlib.h>
 #include "linked_list.h"
 
 int menu();
@@ -17,7 +16,7 @@ int main()
     return 0;
 }
 
-int menu (struct Address_book *address_book_head)
+int menu (struct Address_book **address_book_head)
 {
     int choice = 0;
     printf("\n[1] New address\n");
