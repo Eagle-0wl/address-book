@@ -2,16 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "linked_list.h"
-#include "user_input.h"
 
 //creates contact node from user inputs
-struct Address_book *create_contact (){
+struct Address_book *create_contact (char *name, char *phone_number){
     struct Address_book *new_node = (struct Address_book*) malloc(sizeof(struct Address_book));
-    printf ("\nInput contact name: ");
-    get_user_input (new_node->name,NAMELENGTH);
-
-    printf ("Input phone number: ");
-    get_user_input (new_node->phone_number,NUMBERLENGTH);
+    strncpy(new_node->name,name,NAMELENGTH);
+    strncpy(new_node->phone_number,phone_number,NUMBERLENGTH);
     return new_node;
 };
 
@@ -36,29 +32,21 @@ void contact_colision (struct Address_book *current, struct Address_book *new_no
     char input;
     printf ("There is already and contact with same name [%d] %s %s. Do you want to update it with new info? [y/n]: ",position, current->name, current->phone_number);
     input = fgetc(stdin);
-    fflush (stdin);
     if (input == 'y' || input == 'Y'){
         memset(current->phone_number, '\0', sizeof(char)*NUMBERLENGTH);
         strncpy(current->phone_number, new_node->phone_number, NUMBERLENGTH);
-        free (new_node);
-        clear_cosole();
-        printf ("Address info updated: %s %s", current->name, current->phone_number);
-        return;
+        printf ("\nAddress info updated: %s %s\n", current->name, current->phone_number);
     }
-    else{
-        free (new_node);
-        clear_cosole();
-        return;
-    }
+    free (new_node);
+    while ((input = getchar()) != '\n' && input != EOF) { };
 }
 
 // Function goes through whole list and inserts node in sorted order by address name
-struct Address_book * insert_contact(struct Address_book *address_book_head)
+struct Address_book *insert_contact(struct Address_book *address_book_head,struct Address_book *new_node)
 {
     int position;
     struct Address_book *current;
     struct Address_book *ptr = NULL;
-    struct Address_book * new_node  = create_contact ();
 
     ptr = search_node_in_list(address_book_head,new_node->name,&position);
     if (ptr != NULL){
@@ -113,13 +101,9 @@ struct Address_book * remove_node_from_linked_list (struct Address_book *address
 }
 
 // Function to delete user specified node
-struct Address_book * delete_contact(struct Address_book *address_book_head)
+struct Address_book * delete_contact(struct Address_book *address_book_head, char *name)
 {   
     int rc = 0;
-    char name [NAMELENGTH];
-    printf ("\nInput name of the addres you want to delete: ");
-    fgetc(stdin);
-    get_user_input (name,NAMELENGTH);
     address_book_head = remove_node_from_linked_list (address_book_head, name, &rc);
     if (rc == 0){
         printf ("\nContact %s deleted\n", name);
@@ -146,20 +130,16 @@ void display_address_book(struct Address_book *address_book_head)
 };
 
 //gets user input on what address to search for
-void search_for_contact(struct Address_book *address_book_head)
+void search_for_contact(struct Address_book *address_book_head, char *name)
 {
     int position;
-    char name [NAMELENGTH];
     struct Address_book *ptr = NULL;
-    printf ("\nInput name of the addres you want to search for: ");
-    fgetc(stdin);
-    get_user_input (name,NAMELENGTH);
     ptr = search_node_in_list(address_book_head,name,&position);
     if (ptr != NULL){
-        printf ("Adrress found: %s %s \n", ptr->name, ptr->phone_number); //if node exist display it's info
+        printf ("Contact found:[%d] %s %s \n",position, ptr->name, ptr->phone_number); //if node exist display it's info
     }
     else{
-        printf ("Address not found");
+        printf ("Contact not found");
     }
 };
 
@@ -177,31 +157,25 @@ struct Address_book *cleanup(struct Address_book *address_book_head)
 };
 
 //Function inserts new contact at specific position in list if possible
-struct Address_book * insert_contact_after (struct Address_book *address_book_head, struct Address_book *new_node, int index)
+struct Address_book *insert_contact_after (struct Address_book *address_book_head, struct Address_book *new_node, int index)
 {
     int position;
     int counter = 1;
     struct Address_book *current = address_book_head;
     struct Address_book *ptr = NULL;
     if (current == NULL){
-        printf ("Can't insert contant, because address book is empty");
+        printf ("\nCan't insert contant after [%d] contact, because address book is empty\n",index);
         return;
     }
-
     ptr = search_node_in_list(address_book_head,new_node->name,&position);
     if (ptr != NULL){
         printf ("Adrress with that name found:[%d] %s %s \n",position, ptr->name, ptr->phone_number); //if node exist display it's info
-        contact_colision (current, new_node, position);
+        contact_colision (ptr, new_node, position);
         return address_book_head;
     }
-
     while (counter != index && current->next != NULL){
         current = current->next;
         counter++;
-        if (strcmp(current->name,new_node->name) == 0) {
-            contact_colision (current, new_node, position);
-            return address_book_head;
-        }
     }
     if (counter < index){
         printf ("There is only %d contacts in address book", counter);
